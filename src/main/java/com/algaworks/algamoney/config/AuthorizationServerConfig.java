@@ -16,37 +16,42 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 @Configuration
 @EnableAuthorizationServer
-public class AuthorizationServerConfig  extends AuthorizationServerConfigurerAdapter{
+public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
-	
+
 	@Autowired
 	private UserDetailsService userDetailsService;
-	
+
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-		System.out.println("passando");
 		clients.inMemory()
-				.withClient("angular")
+		.withClient("angular")
 				.secret(passwordEncoder.encode("angular"))
 				.scopes("read", "write")
-				.authorizedGrantTypes("password","refresh_token")
+				.authorizedGrantTypes("password", "refresh_token")
 				.accessTokenValiditySeconds(1800)
-				.refreshTokenValiditySeconds(3600*24);
+				.refreshTokenValiditySeconds(3600 * 24)
+			.and()
+		
+		.withClient("mobile")
+				.secret(passwordEncoder.encode("mobile"))
+				.scopes("read")
+				.authorizedGrantTypes("password", "refresh_token")
+				.accessTokenValiditySeconds(1800)
+				.refreshTokenValiditySeconds(3600 * 24);
+		;
 	}
 
 	@Override
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-		endpoints
-				.tokenStore(tokenStore())
-				.accessTokenConverter(accessTokenConverter())
-				.reuseRefreshTokens(false)
-		      
-		        .userDetailsService(this.userDetailsService)
+		endpoints.tokenStore(tokenStore()).accessTokenConverter(accessTokenConverter()).reuseRefreshTokens(false)
+
+				.userDetailsService(this.userDetailsService)
 
 				.authenticationManager(authenticationManager);
 	}
@@ -57,12 +62,10 @@ public class AuthorizationServerConfig  extends AuthorizationServerConfigurerAda
 		accessTokenConverter.setSigningKey("vreal");
 		return accessTokenConverter;
 	}
-	
+
 	@Bean
 	public TokenStore tokenStore() {
 		return new JwtTokenStore(accessTokenConverter());
 	}
-
-
 
 }
