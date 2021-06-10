@@ -5,5 +5,5 @@ target/
 .classpath
 .factorypath
 .project
-.settings
+.setting
 .springBeans
